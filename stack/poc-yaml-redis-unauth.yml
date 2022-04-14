@@ -1,0 +1,26 @@
+name: poc-yaml-redis-unauth
+manual: false
+transport: tcp
+set:
+  re1: '"redis_version:(?P<version>.+?)\x0d\x0a"'
+rules:
+  r0:
+    request:
+      cache: true
+      content: "info\x0d\x0a"
+      read_timeout: 3
+    expression: re1.bmatches(response.raw)
+    output:
+      re1_result: re1.bsubmatch(response.raw)
+      version: '"redis_version: " + re1_result["version"]'
+
+expression: r0()
+detail:
+  fingerprint: 
+    infos:
+      - type: unauth
+        name: redis
+        version: '{{version}}'
+  author: Jarcis-cy(https://github.com/jarcis-cy)
+  links:
+      - https://github.com/vulhub/vulhub/tree/master/redis/4-unacc
